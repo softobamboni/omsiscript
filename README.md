@@ -5,6 +5,6 @@ Features:
 - [x] If conditions
 - [x] Macros
 - [x] Variables (defined in varlists)
-- [ ] Constants (from constfiles)
+- [x] Constants (from constfiles)
 
 Script language documentation: http://wiki.omnibussimulator.de/omsiwikineu/index.php?title=Scripting_System
