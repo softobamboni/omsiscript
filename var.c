@@ -23,6 +23,6 @@ int id_vars(const char* varlist_fname, char type, struct var_ids varid[], void* 
         varcnt++;
     }
     *vars = calloc(varcnt, size);
-    if(*vars) printf("\nAllocated memory for %d variables", varcnt);
+    if(*vars) printf("\nAllocated %zd bytes for variables", varcnt*sizeof(float));
     return varcnt;
 }

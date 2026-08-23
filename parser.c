@@ -15,8 +15,10 @@ char* strstack[8] = {str0,str1,str2,str3,str4,str5,str6,str7};
 char strptr = 7;
 struct macro_vector mv[256];
 struct var_ids vid[1024];
+struct const_def *const_ptr;
+struct line_func *func_ptr;
 float* vars = 0;
-int mvcnt, varcnt;
+int mvcnt, varcnt, constcnt, funcnt;
 
 void error(char code){
     putchar('\n');
@@ -25,6 +27,7 @@ void error(char code){
         case 2: printf("Stack underflow!"); break;
         case 3: printf("String stack underflow!"); break;
         case 4: printf("String length out of range!"); break;
+        case 20: printf("File not found!"); break;
         default: printf("Unknown error!");
     }
     exit(code);
@@ -118,6 +121,24 @@ static inline void strcls(char* str){
     i = 0;
     while(str[i] == ' ') i++;
     if(!strcutl(str,i)) exit(1);
+}
+
+static inline float func(float x, struct coords pnt[]){ // returns y = f(x)
+    register char i = 0;
+    register float x1, x0, y1, y0;
+    x1 = pnt[0].x;
+    while(i++ < 64){ // find 2 pnts with x values between float x
+        x0 = x1;    
+        x1 = pnt[i].x;
+        if(x >= x0) if(x <= x1) break; // x1 ALWAYS > x0
+    } // y0 = kx0 + n; y1 = kx1 + n; y0 - y1 = kx0 - kx1 = k(x0 - x1)
+    y0 = pnt[i-1].y;
+    y1 = pnt[i].y;
+
+    register float k = (y1 - y0) / (x1 - x0);
+    register float n = y0 - k*x0;
+    
+    return k*x + n;
 }
 
 void getfile(const char* fname, char** filebuf){
@@ -220,6 +241,36 @@ char* exec(char* filebuf, char arg){ // arg: 0 = regular code, 1 = if condition,
                         i = 0;
                         while(i < mvcnt){
                             if(id1 == mv[i].id1) if(id2 == mv[i].id2) {printf("\nFound macro #%d", i); exec(mv[i].vector, 0);} // search for teh checksum
+                            i++;
+                        }
+                        break;
+                    case 'C':
+                        filebuf += 4; //temporarily to skip ".L."
+                        i = 0;
+                        while(*filebuf != ')'){
+                            id1 += *filebuf; // calculate teh checksum of teh macro name
+                            if(i % 2) id2 += *filebuf;
+                            filebuf++;
+                            i++;
+                        }
+                        i = 0;
+                        while(i < constcnt){
+                            if(id1 == const_ptr[i].id1) if(id2 == const_ptr[i].id2) {printf("\nFound const #%d", i); push(const_ptr[i].value);} // search for teh checksum
+                            i++;
+                        }
+                        break;
+                    case 'F':
+                        filebuf += 4; //temporarily to skip ".L."
+                        i = 0;
+                        while(*filebuf != ')'){
+                            id1 += *filebuf; // calculate teh checksum of teh macro name
+                            if(i % 2) id2 += *filebuf;
+                            filebuf++;
+                            i++;
+                        }
+                        i = 0;
+                        while(i < funcnt){
+                            if(id1 == func_ptr[i].id1) if(id2 == func_ptr[i].id2) {printf("\nFound function #%d", i); push(func(pop(), func_ptr[i].pnt));} // search for teh checksum
                             i++;
                         }
                         break;
@@ -423,6 +474,7 @@ int main(){
 //    exec(filebuf, 0);
     mvcnt = make_vectors(filebuf, mv);
     varcnt = id_vars("MultiGbxScript_varlist.txt", 0, vid, (void**)&vars);
+    init_const("MultiGbxScript_consfile.txt", const_ptr, func_ptr, &const_ptr, &func_ptr, &constcnt, &funcnt);
     exec(filebuf, 0);
     return 0;
 }
