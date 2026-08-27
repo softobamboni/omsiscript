@@ -21,9 +21,38 @@ struct coords{
 struct line_func{
     unsigned id1;
     unsigned id2;
-    struct coords pnt[64];
+    struct coords *pnt;
 };
 
-extern int make_vectors(char* filebuf, struct macro_vector mv[]);
-extern int id_vars(const char* varlist_fname, char type, struct var_ids varid[], void* vars[]);
-extern void init_const(const char* filename, struct const_def const_ptr[], struct line_func lf[], struct const_def **newptr, struct line_func **nptr_func, int *ccptr, int *fcptr);
+struct parser_args{
+    char* filename_osc;
+    char* filename_constfile;
+    char* filename_varlist;
+    char* filename_stringvarlist;
+    struct var_ids *global_vid;
+    float* global_vars;
+    int* global_varcnt;
+};
+
+struct exec_args{
+    char mode;
+    struct macro_vector *mv;
+    struct macro_vector *tv;
+    struct var_ids *vid;
+    struct const_def *const_ptr;
+    struct line_func *func_ptr;
+    float* vars;
+    struct var_ids *global_vid;
+    float* global_vars;
+    int mvcnt;
+    int varcnt;
+    int constcnt;
+    int funcnt;
+    int* global_varcnt;
+};
+
+void* parse_func(void* args);
+int make_vectors(char* filebuf, char** init_v, char** frame_v, struct macro_vector *mvptr[], struct macro_vector *tvptr[]);
+int id_vars(const char* varlist_fname, char type, struct var_ids *varid[], void* vars[]);
+void init_const(const char* filename, struct const_def *const_ptr[], struct line_func *lf[], int *ccptr, int *fcptr);
+void error(char code);

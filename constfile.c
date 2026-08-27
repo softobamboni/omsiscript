@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include "script.h"
 
-void init_const(const char* filename, struct const_def const_ptr[], struct line_func lf[], struct const_def **newptr, struct line_func **nptr_func, int *ccptr, int *fcptr){
+void init_const(const char* filename, struct const_def *const_ptr[], struct line_func *lf[], int *ccptr, int *fcptr){
     FILE* constfile = fopen(filename,"r");
     if(!constfile) error(20);
 
@@ -19,7 +19,7 @@ void init_const(const char* filename, struct const_def const_ptr[], struct line_
                 fgets(buf,1024,constfile);
 
                 constcnt++;
-                const_ptr = realloc(const_ptr, constcnt * sizeof(struct const_def));
+                *const_ptr = realloc(*const_ptr, constcnt * sizeof(struct const_def));
 
                 id1 = id2 = i = 0;
                 while(!isspace(buf[i])){
@@ -27,25 +27,26 @@ void init_const(const char* filename, struct const_def const_ptr[], struct line_
                     if(i % 2) id2 += buf[i];
                     i++;
                 }
-                const_ptr[constcnt-1].id1 = id1;
-                const_ptr[constcnt-1].id2 = id2;
+                (*const_ptr)[constcnt-1].id1 = id1;
+                (*const_ptr)[constcnt-1].id2 = id2;
 
                 fgets(buf,1024,constfile);
-                const_ptr[constcnt-1].value = strtof(buf, NULL);
+                (*const_ptr)[constcnt-1].value = strtof(buf, NULL);
             }
             else if(!strncmp(buf+1,"newcurve]",9)){
                 fgets(buf,1024,constfile);
 
                 if(pntcnt){ //store pending function
-                    cur_size += 3*sizeof(unsigned) + 2*64*sizeof(float);
-                    lf = realloc(lf, cur_size);
-                    lf[funcnt-1].id1 = id1;
-                    lf[funcnt-1].id2 = id2;
+                    cur_size += 3*sizeof(struct line_func);
+                    *lf = realloc(*lf, cur_size);
+                    (*lf)[funcnt-1].id1 = id1;
+                    (*lf)[funcnt-1].id2 = id2;
+
+                    (*lf)[funcnt-1].pnt = malloc(pntcnt * 2*sizeof(float));
                     for(i = 0; i < pntcnt; i++) {
-                        lf[funcnt-1].pnt[i].x = xy_buf[i].x;
-                        lf[funcnt-1].pnt[i].y = xy_buf[i].y;
+                        (*((*lf)[funcnt-1].pnt+i)).x = xy_buf[i].x; // didn't figure out how 2 get the Flexible Array Member™ to work
+                        (*((*lf)[funcnt-1].pnt+i)).y = xy_buf[i].y; // so i malloc'd some space for an array for function points and accessed it with that
                     }
-                    lf[funcnt-1].pnt[i].x = -0.f;
                     pntcnt = 0;
                 }
 
@@ -68,9 +69,7 @@ void init_const(const char* filename, struct const_def const_ptr[], struct line_
             }
         }
     }
-    *newptr = const_ptr;
-    *nptr_func = lf;
     *ccptr = constcnt;
     *fcptr = funcnt;
-    printf("\nAllocated %zu + %zu bytes for constables", sizeof(*const_ptr) * constcnt, cur_size);
+    printf("\nAllocated %zu + %zu bytes for constables", sizeof(*(*const_ptr)) * constcnt, cur_size + pntcnt * 2*sizeof(float));
 }

@@ -3,7 +3,7 @@
 #include <ctype.h>
 #include "script.h"
 
-int id_vars(const char* varlist_fname, char type, struct var_ids varid[], void* vars[]){ //type: 0 = float, 1 = string
+int id_vars(const char* varlist_fname, char type, struct var_ids *varid[], void* vars[]){ //type: 0 = float, 1 = string
     FILE* varlist = fopen(varlist_fname,"r");
     if(!varlist) error(20);
 
@@ -13,16 +13,17 @@ int id_vars(const char* varlist_fname, char type, struct var_ids varid[], void* 
 
     while(fgets(buf, 1024, varlist)){
         if((isspace(buf[0]))) continue;
-        i = varid[varcnt].id1 = varid[varcnt].id2 = 0;
+        *varid = realloc(*varid, sizeof(unsigned) * 2 * (varcnt+1));
+        i = (*varid)[varcnt].id1 = (*varid)[varcnt].id2 = 0;
         while(!(isspace(buf[i]))){
-            varid[varcnt].id1 += buf[i];
-            if(i % 2) varid[varcnt].id2 += buf[i];
+            (*varid)[varcnt].id1 += buf[i];
+            if(i % 2) (*varid)[varcnt].id2 += buf[i];
             i++;
         }
 //        printf("\nChecksum: %u; \nOdd letter checksum: %u;\n", varid[varcnt].id1, varid[varcnt].id2);
         varcnt++;
     }
     *vars = calloc(varcnt, size);
-    if(*vars) printf("\nAllocated %zd bytes for variables", varcnt*sizeof(float));
+    if(*vars) printf("\nAllocated %d bytes for variables", varcnt*size);
     return varcnt;
 }
