@@ -35,7 +35,6 @@ struct parser_args{
 };
 
 struct exec_args{
-    char mode;
     struct macro_vector *mv;
     struct macro_vector *tv;
     struct var_ids *vid;
@@ -53,6 +52,7 @@ struct exec_args{
 
 void* parse_func(void* args);
 int make_vectors(char* filebuf, char** init_v, char** frame_v, struct macro_vector *mvptr[], struct macro_vector *tvptr[]);
-int id_vars(const char* varlist_fname, char type, struct var_ids *varid[], void* vars[]);
+int id_vars(const char* varlist_fname, char type, struct var_ids *varid[], void* vars[], unsigned long* size_t, unsigned long* size_v);
 void init_const(const char* filename, struct const_def *const_ptr[], struct line_func *lf[], int *ccptr, int *fcptr);
 void error(char code);
+void getfile(const char* fname, char** filebuf, unsigned long* prev_size);

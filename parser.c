@@ -107,10 +107,10 @@ static inline void inttostr(int n, char* str, const char* fmt){
 
 static inline void strcls(char* str){
     int i = strlen(str);
-    while(str[--i] == ' ');
+    while(isspace(str[--i]));
     str[i+1] = 0;
     i = 0;
-    while(str[i] == ' ') i++;
+    while(isspace(str[i])) i++;
     if(!strcutl(str,i)) error(1);
 }
 
@@ -132,16 +132,18 @@ static inline float func(float x, struct coords pnt[]){ // returns y = f(x)
     return k*x + n;
 }
 
-void getfile(const char* fname, char** filebuf){
+void getfile(const char* fname, char** filebuf, unsigned long *prev_size){
     FILE* osc = fopen(fname, "rb");
     if(!osc) error(6);
+    void* ptr = *filebuf;
     fseek(osc,0,SEEK_END);
     unsigned long int fsize = ftell(osc) + 1;
 
-    *filebuf = malloc(fsize);
+    if(prev_size){ptr += *prev_size - 1; *prev_size += fsize; *filebuf = realloc(&filebuf, *prev_size);}
+    else *filebuf = malloc(fsize);
 
     rewind(osc);
-    if(!fread(*filebuf, 1, fsize, osc)) error(7);
+    if(!fread(ptr, 1, fsize, osc)) error(7);
     fclose(osc);
 }
 
@@ -487,13 +489,12 @@ void* parse_func(void* args){
 
     exec_args.func_ptr = NULL;
     exec_args.const_ptr = NULL;
-    getfile(args2->filename_osc,&filebuf);
+    getfile(args2->filename_osc,&filebuf, NULL);
     srand(time(NULL));
 
     exec_args.mvcnt = make_vectors(filebuf, NULL, NULL, &(exec_args.mv), &(exec_args.tv));
     exec_args.varcnt = id_vars(args2->filename_varlist, 0, &(exec_args.vid), (void**)&(exec_args.vars));
     init_const(args2->filename_constfile, &(exec_args.const_ptr), &(exec_args.func_ptr), &(exec_args.constcnt), &(exec_args.funcnt));
-    exec_args.mode = 0;
 
     exec_args.global_varcnt = args2->global_varcnt;
     exec_args.global_vid = args2->global_vid;
