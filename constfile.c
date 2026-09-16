@@ -9,15 +9,17 @@ void init_const(const char* filename, struct const_def *const_ptr[], struct line
     if(!constfile) error(20);
 
     char buf[1024]; 
-    register unsigned i = 0, constcnt, funcnt = 0, pntcnt = 0, id1 = 0, id2 = 0;
+    register unsigned i = 0, constcnt, funcnt, pntcnt = 0, id1 = 0, id2 = 0;
     register unsigned long cur_size;
     struct coords xy_buf[256];
 
-    if(cur_constcnt) constcnt = *cur_constcnt;
+    if(ccptr) constcnt = *ccptr;
     else constcnt = 0;
 
-    if(old_size) cur_size = *old_size;
-    else cur_size = 0;
+    if(fcptr) funcnt = *fcptr ;
+    else funcnt = 0;
+
+    cur_size = funcnt * sizeof(struct line_func);
 
     while(fgets(buf,1024,constfile)){
         if(*buf == '['){
@@ -43,7 +45,7 @@ void init_const(const char* filename, struct const_def *const_ptr[], struct line
                 fgets(buf,1024,constfile);
 
                 if(pntcnt){ //store pending function
-                    cur_size += 3*sizeof(struct line_func);
+                    cur_size += sizeof(struct line_func);
                     *lf = realloc(*lf, cur_size);
                     (*lf)[funcnt-1].id1 = id1;
                     (*lf)[funcnt-1].id2 = id2;
@@ -77,7 +79,5 @@ void init_const(const char* filename, struct const_def *const_ptr[], struct line
     }
     *ccptr = constcnt;
     *fcptr = funcnt;
-    *cur_constcnt = constcnt;
-    *old_size = cur_size;
     printf("\nAllocated %zu + %zu bytes for constables", sizeof(*(*const_ptr)) * constcnt, cur_size + pntcnt * 2*sizeof(float));
 }
