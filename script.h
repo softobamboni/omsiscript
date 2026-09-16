@@ -38,6 +38,7 @@ struct exec_args{
     struct macro_vector *mv;
     struct macro_vector *tv;
     struct var_ids *vid;
+    struct var_ids *strvid;
     struct const_def *const_ptr;
     struct line_func *func_ptr;
     float* vars;
@@ -45,6 +46,7 @@ struct exec_args{
     float* global_vars;
     int mvcnt;
     int varcnt;
+    int strvarcnt;
     int constcnt;
     int funcnt;
     int* global_varcnt;
