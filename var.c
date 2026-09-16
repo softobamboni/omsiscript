@@ -30,6 +30,8 @@ int id_vars(const char* varlist_fname, char type, struct var_ids *varid[], void*
         varcnt++;
     }
     *vars = realloc(*vars, oldsize_v + varcnt*size);
+    *size_v = oldsize_v + varcnt*size;
+    *size_t = oldsize_t + (sizeof(unsigned) * 2 * (varcnt+1));
     if(*vars) printf("\nAllocated %d bytes for variables", varcnt*size);
     return varcnt;
 }
