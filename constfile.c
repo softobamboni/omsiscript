@@ -77,5 +77,7 @@ void init_const(const char* filename, struct const_def *const_ptr[], struct line
     }
     *ccptr = constcnt;
     *fcptr = funcnt;
+    *cur_constcnt = constcnt;
+    *old_size = cur_size;
     printf("\nAllocated %zu + %zu bytes for constables", sizeof(*(*const_ptr)) * constcnt, cur_size + pntcnt * 2*sizeof(float));
 }
