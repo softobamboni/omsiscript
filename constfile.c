@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include "script.h"
 
-void init_const(const char* filename, struct const_def *const_ptr[], struct line_func *lf[], int *ccptr, int *fcptr, unsigned* cur_constcnt, unsigned long* old_size){
+void init_const(const char* filename, struct const_def *const_ptr[], struct line_func *lf[], int *ccptr, int *fcptr){
     FILE* constfile = fopen(filename,"r");
     if(!constfile) error(20);
 
