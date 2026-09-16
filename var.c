@@ -15,7 +15,7 @@ int id_vars(const char* varlist_fname, char type, struct var_ids *varid[], void*
     if(size_v) oldsize_v = *size_v;
     else oldsize_v = 0;
 
-    size = type?256:sizeof(float);
+    size = type?1024:sizeof(float);
 
     while(fgets(buf, 1024, varlist)){
         if((isspace(buf[0]))) continue;
