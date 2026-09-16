@@ -4,14 +4,20 @@
 #include <ctype.h>
 #include "script.h"
 
-void init_const(const char* filename, struct const_def *const_ptr[], struct line_func *lf[], int *ccptr, int *fcptr){
+void init_const(const char* filename, struct const_def *const_ptr[], struct line_func *lf[], int *ccptr, int *fcptr, unsigned* cur_constcnt, unsigned long* old_size){
     FILE* constfile = fopen(filename,"r");
     if(!constfile) error(20);
 
     char buf[1024]; 
-    register unsigned i = 0, constcnt = 0, funcnt = 0, pntcnt = 0, id1 = 0, id2 = 0;
-    register unsigned long cur_size = 0;
+    register unsigned i = 0, constcnt, funcnt = 0, pntcnt = 0, id1 = 0, id2 = 0;
+    register unsigned long cur_size;
     struct coords xy_buf[256];
+
+    if(cur_constcnt) constcnt = *cur_constcnt;
+    else constcnt = 0;
+
+    if(old_size) cur_size = *old_size;
+    else cur_size = 0;
 
     while(fgets(buf,1024,constfile)){
         if(*buf == '['){
@@ -45,7 +51,7 @@ void init_const(const char* filename, struct const_def *const_ptr[], struct line
                     (*lf)[funcnt-1].pnt = malloc(pntcnt * 2*sizeof(float));
                     for(i = 0; i < pntcnt; i++) {
                         (*((*lf)[funcnt-1].pnt+i)).x = xy_buf[i].x; // didn't figure out how 2 get the Flexible Array Member™ to work
-                        (*((*lf)[funcnt-1].pnt+i)).y = xy_buf[i].y; // so i malloc'd some space for an array for function points and accessed it with that
+                        (*((*lf)[funcnt-1].pnt+i)).y = xy_buf[i].y; // so i malloc'd some space for an array for function points and accessed it with that mess of parentheses and dereference operators
                     }
                     pntcnt = 0;
                 }
