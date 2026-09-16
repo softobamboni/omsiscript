@@ -8,12 +8,12 @@ int id_vars(const char* varlist_fname, char type, struct var_ids *varid[], void*
     if(!varlist) error(20);
 
     char buf[1024]; 
-    register int i, varcnt = 0, size, oldsize_t, oldsize_v;
+    register int i, varcnt =, size, oldsize_t;
     if(size_t) oldsize_t = *size_t;
     else oldsize_t = 0;
 
-    if(size_v) oldsize_v = *size_v;
-    else oldsize_v = 0;
+    if(size_v) varcnt = *size_v;
+    else varcnt = 0;
 
     size = type?1024:sizeof(float);
 
@@ -29,8 +29,7 @@ int id_vars(const char* varlist_fname, char type, struct var_ids *varid[], void*
 //        printf("\nChecksum: %u; \nOdd letter checksum: %u;\n", varid[varcnt].id1, varid[varcnt].id2);
         varcnt++;
     }
-    *vars = realloc(*vars, oldsize_v + varcnt*size);
-    *size_v = oldsize_v + varcnt*size;
+    *vars = realloc(*vars, varcnt*size);
     *size_t = oldsize_t + (sizeof(unsigned) * 2 * (varcnt+1));
     if(*vars) printf("\nAllocated %d bytes for variables", varcnt*size);
     return varcnt;
